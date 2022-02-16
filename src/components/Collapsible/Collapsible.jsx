@@ -14,6 +14,7 @@ class Collapsible extends React.Component {
   _isMounted = false
   node
   heightNode
+  animationTimeout
 
   componentDidMount() {
     this._isMounted = true
@@ -41,6 +42,7 @@ class Collapsible extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const { isOpen: wasOpen } = prevProps
 
+    clearTimeout(this.animationTimeout)
     this.handleAnimation(wasOpen)
 
     if (this.shouldFireStateCallback(prevProps, prevState)) {
@@ -76,7 +78,7 @@ class Collapsible extends React.Component {
 
         /* Reliable to test in JSDOM due to timeouts */
         case 'closing':
-          setTimeout(() => {
+          this.animationTimeout = setTimeout(() => {
             this.safeSetState({
               animationState: 'closed',
             })
@@ -91,7 +93,7 @@ class Collapsible extends React.Component {
 
         /* Reliable to test in JSDOM due to timeouts */
         case 'opening':
-          setTimeout(() => {
+          this.animationTimeout = setTimeout(() => {
             this.safeSetState({
               animationState: 'opened',
             })
@@ -125,7 +127,7 @@ class Collapsible extends React.Component {
     }
 
     if (animationState === 'measuring') {
-      return isOpen ? null : 'auto'
+      return this.node ? this.node.scrollHeight : 'auto'
     }
 
     if (animationState === 'opened') {
